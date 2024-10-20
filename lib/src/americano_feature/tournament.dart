@@ -32,29 +32,69 @@ class Tournament extends HiveObject {
     }
 
     schedule.clear();
-    List<Player> shuffledPlayers = List.from(players)..shuffle();
+
+    // Create all possible pairs from players
+    List<Team> pairs = [];
+    for (int i = 0; i < players.length; i++) {
+      for (int j = i + 1; j < players.length; j++) {
+        pairs.add(Team(player1: players[i], player2: players[j]));
+      }
+    }
+
+    // Shuffle the pairs
+    pairs.shuffle();
+
     int roundNumber = 1;
+    List<Player> usedPlayers;
 
-    while (shuffledPlayers.length >= 4) {
+    // Create rounds
+    while (pairs.length >= 2) {
       List<Match> matches = [];
+      usedPlayers = [];
+      int matchesInRound = (players.length / 4).floor();
 
-      for (int court = 1; court <= numberOfCourts; court++) {
-        if (shuffledPlayers.length < 4) break;
+      for (int i = 0; i < matchesInRound; i++) {
+        if (pairs.isEmpty) break;
 
-        Player player1 = shuffledPlayers.removeAt(0);
-        Player player2 = shuffledPlayers.removeAt(0);
-        Player player3 = shuffledPlayers.removeAt(0);
-        Player player4 = shuffledPlayers.removeAt(0);
+        Team team1;
+        Team team2;
 
+        // Find a valid pair for team1
+        team1 = pairs.firstWhere((pair) =>
+            !usedPlayers.contains(pair.player1) && !usedPlayers.contains(pair.player2),
+            orElse: () => Team(player1: Player(name: '', id: -1), player2: Player(name: '', id: -1)));
+        if (team1.player1.id == -1) break;
+
+        // Remove the used pair and add players to used list
+        pairs.remove(team1);
+        usedPlayers.add(team1.player1);
+        usedPlayers.add(team1.player2);
+
+        // Find a valid pair for team2
+        team2 = pairs.firstWhere((pair) =>
+            !usedPlayers.contains(pair.player1) && !usedPlayers.contains(pair.player2),
+            orElse: () => Team(player1: Player(name: '', id: -1), player2: Player(name: '', id: -1)));
+        if (team2.player1.id == -1) break;
+
+        // Remove the used pair and add players to used list
+        pairs.remove(team2);
+        usedPlayers.add(team2.player1);
+        usedPlayers.add(team2.player2);
+
+        // Add match to the round
         matches.add(Match(
-          courtNumber: court,
-          team1: Team(player1: player1, player2: player2),
-          team2: Team(player1: player3, player2: player4),
+          courtNumber: 0, // No court information needed
+          team1: team1,
+          team2: team2,
         ));
       }
 
-      schedule.add(Round(roundNumber: roundNumber, matches: matches));
-      roundNumber++;
+      if (matches.isNotEmpty) {
+        schedule.add(Round(roundNumber: roundNumber, matches: matches));
+        roundNumber++;
+      } else {
+        break;
+      }
     }
   }
 }

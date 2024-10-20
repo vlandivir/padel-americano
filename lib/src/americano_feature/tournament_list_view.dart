@@ -9,13 +9,17 @@ class TournamentHomePage extends StatefulWidget {
   static const routeName = '/';
 
   @override
-  _TournamentHomePageState createState() => _TournamentHomePageState();
+  TournamentHomePageState createState() => TournamentHomePageState();
 }
-class _TournamentHomePageState extends State<TournamentHomePage> {
+class TournamentHomePageState extends State<TournamentHomePage> {
   late Box<Tournament> tournamentBox;
   final TextEditingController _numberOfPlayersController = TextEditingController(text: '8');
   final TextEditingController _numberOfCourtsController = TextEditingController(text: '2');
   final TextEditingController _numberOfPointsController = TextEditingController(text: '16');
+
+  final List<String> playerNames = [
+    'Alice', 'Bob', 'Charlie', 'David', 'Eve', 'Frank', 'Grace', 'Hank', 'Ivy', 'Jack', 'Kathy', 'Leo', 'Mia', 'Nancy', 'Oscar', 'Paul', 'Quincy', 'Rachel', 'Steve', 'Tracy', 'Uma', 'Vince', 'Wendy', 'Xander', 'Yara', 'Zack'
+  ];
 
   @override
   void initState() {
@@ -34,8 +38,8 @@ class _TournamentHomePageState extends State<TournamentHomePage> {
     final numberOfPoints = int.tryParse(_numberOfPointsController.text) ?? 16;
 
     final tournament = Tournament(name: 'Americano Padel', numberOfPoints: numberOfPoints, numberOfCourts: numberOfCourts);
-    for (int i = 1; i <= numberOfPlayers; i++) {
-      tournament.addPlayer('Player $i', i);
+    for (int i = 0; i < numberOfPlayers && i < playerNames.length; i++) {
+      tournament.addPlayer(playerNames[i], i + 1);
     }
     tournament.createSchedule();
     tournamentBox.add(tournament);
