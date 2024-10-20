@@ -25,8 +25,18 @@ class Tournament extends HiveObject {
     players.add(Player(name: playerName, id: playerId));
   }
 
+  void printTeams(List<Team> teams) {
+    // ignore: avoid_print
+    print('--- ${teams.length} ---');
+    for (var team in teams) {
+      // ignore: avoid_print
+      print('Team: ${team.player1.name} & ${team.player2.name}');
+    }
+  }
+
   void createSchedule() {
     if (players.length < 4) {
+      // ignore: avoid_print
       print('Not enough players to create a schedule. At least 4 players are required.');
       return;
     }
@@ -42,60 +52,61 @@ class Tournament extends HiveObject {
     }
 
     // Shuffle the pairs
-    pairs.shuffle();
+    // pairs.shuffle();
 
-    int roundNumber = 1;
+    int matchesInRound = (players.length / 4).floor();
+    int pairsInRound = matchesInRound * 2;
+    int roundsNumber = (pairs.length / 2 / matchesInRound).floor();
+
+    int currentCourt = 1;
+
     List<Player> usedPlayers;
 
-    // Create rounds
-    while (pairs.length >= 2) {
+    for (int i = 0; i < roundsNumber; i += 1) {
       List<Match> matches = [];
+      List<Team> teams = [];
       usedPlayers = [];
-      int matchesInRound = (players.length / 4).floor();
 
-      for (int i = 0; i < matchesInRound; i++) {
-        if (pairs.isEmpty) break;
+      // Select teams for round
+      for (int j = 0; j < pairs.length; j += 1) {
+        Team currentTeam = pairs[j];
+        if (!usedPlayers.contains(currentTeam.player1) && !usedPlayers.contains(currentTeam.player2)) {
+          teams.add(currentTeam);
+          pairs.remove(currentTeam);
+          j -= 1;
+          usedPlayers.add(currentTeam.player1);
+          usedPlayers.add(currentTeam.player2);
+        }
 
-        Team team1;
-        Team team2;
-
-        // Find a valid pair for team1
-        team1 = pairs.firstWhere((pair) =>
-            !usedPlayers.contains(pair.player1) && !usedPlayers.contains(pair.player2),
-            orElse: () => Team(player1: Player(name: '', id: -1), player2: Player(name: '', id: -1)));
-        if (team1.player1.id == -1) break;
-
-        // Remove the used pair and add players to used list
-        pairs.remove(team1);
-        usedPlayers.add(team1.player1);
-        usedPlayers.add(team1.player2);
-
-        // Find a valid pair for team2
-        team2 = pairs.firstWhere((pair) =>
-            !usedPlayers.contains(pair.player1) && !usedPlayers.contains(pair.player2),
-            orElse: () => Team(player1: Player(name: '', id: -1), player2: Player(name: '', id: -1)));
-        if (team2.player1.id == -1) break;
-
-        // Remove the used pair and add players to used list
-        pairs.remove(team2);
-        usedPlayers.add(team2.player1);
-        usedPlayers.add(team2.player2);
-
-        // Add match to the round
-        matches.add(Match(
-          courtNumber: 0, // No court information needed
-          team1: team1,
-          team2: team2,
-        ));
+        if (teams.length == pairsInRound) {
+          break;
+        }
       }
 
+      printTeams(teams);
+      printTeams(pairs);
+
+      // Create matches for selected teams
+      for (int j = 0; j < teams.length; j += 2) {
+        matches.add(Match(
+          courtNumber: currentCourt,
+          team1: teams[j + 0],
+          team2: teams[j + 1],
+        ));
+
+        currentCourt += 1;
+        if (currentCourt > numberOfCourts) {
+          currentCourt = 1;
+        } 
+      }
+
+      // Create round
       if (matches.isNotEmpty) {
-        schedule.add(Round(roundNumber: roundNumber, matches: matches));
-        roundNumber++;
+        schedule.add(Round(roundNumber: i + 1, matches: matches));
       } else {
         break;
-      }
-    }
+      }      
+    }    
   }
 }
 

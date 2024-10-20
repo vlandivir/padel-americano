@@ -110,7 +110,7 @@ class TournamentHomePageState extends State<TournamentHomePage> {
                     child: ListView.builder(
                       itemCount: box.values.length,
                       itemBuilder: (context, index) {
-                        final tournament = box.getAt(index);
+                        final tournament = box.getAt(box.values.length - 1 - index); // sort
                         if (tournament == null) {
                           return ListTile(
                             title: Text('Unnamed Tournament'),
@@ -145,7 +145,9 @@ class TournamentHomePageState extends State<TournamentHomePage> {
     for (var round in tournament.schedule) {
       buffer.writeln(' Round ${round.roundNumber}:');
       for (var match in round.matches) {
-        buffer.writeln('  Court ${match.courtNumber}: ${match.team1.player1.name} & ${match.team1.player2.name} vs ${match.team2.player1.name} & ${match.team2.player2.name}');
+        final team1 = '${match.team1.player1.name} (${match.team1.player1.id}) & ${match.team1.player2.name} (${match.team1.player2.id})';
+        final team2 = '${match.team2.player1.name} (${match.team2.player1.id}) & ${match.team2.player2.name} (${match.team2.player2.id})';
+        buffer.writeln('  Court ${match.courtNumber}: $team1 vs $team2');
       }
     }
     return buffer.toString();
