@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_americano/src/americano_feature/tournament_list_view.dart';
 
 import '../settings/settings_view.dart';
 import 'sample_item.dart';
@@ -11,7 +12,7 @@ class SampleItemListView extends StatelessWidget {
     this.items = const [SampleItem(1), SampleItem(2), SampleItem(3)],
   });
 
-  static const routeName = '/';
+  static const routeName = '/sample';
 
   final List<SampleItem> items;
 
@@ -21,6 +22,12 @@ class SampleItemListView extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Sample Items'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.tour),
+            onPressed: () {
+              Navigator.restorablePushNamed(context, TournamentHomePage.routeName);
+            },
+          ),
           IconButton(
             icon: const Icon(Icons.settings),
             onPressed: () {

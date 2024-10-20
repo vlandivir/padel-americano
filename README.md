@@ -1,4 +1,4 @@
-# flutter_americano
+# padel-americano
 
 A new Flutter project.
 
