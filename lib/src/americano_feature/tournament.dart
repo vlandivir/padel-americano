@@ -19,20 +19,46 @@ class Tournament extends HiveObject {
   @HiveField(4)
   List<Round> schedule = [];
 
+  @HiveField(5)
+  List<Team> drawPair = [];
+
   Tournament({required this.name, required this.numberOfPoints, required this.numberOfCourts});
 
   void addPlayer(String playerName, int playerId) {
     players.add(Player(name: playerName, id: playerId));
   }
 
-  void printTeams(List<Team> teams) {
+  void printTeams(List<Team> teams, {String splitter = ""}) {
     // ignore: avoid_print
     print('--- ${teams.length} ---');
     for (var team in teams) {
       // ignore: avoid_print
       print('Team: ${team.player1.name} & ${team.player2.name}');
     }
+    if (splitter != "") {
+      // ignore: avoid_print
+      print(splitter);
+    }
   }
+
+  void sortTeamsByCommonPlayers(List<Team> pairs) {
+    // Create a map to count the occurrences of each player
+    Map<Player, int> playerCounts = {};
+
+    // Count how many times each player appears in the list of pairs
+    for (Team team in pairs) {
+      playerCounts.update(team.player1, (count) => count + 1, ifAbsent: () => 1);
+      playerCounts.update(team.player2, (count) => count + 1, ifAbsent: () => 1);
+    }
+
+    // Sort pairs based on the sum of occurrences of their players
+    pairs.sort((a, b) {
+      int aCount = playerCounts[a.player1]! + playerCounts[a.player2]!;
+      int bCount = playerCounts[b.player1]! + playerCounts[b.player2]!;
+      return bCount.compareTo(aCount); // Sort in descending order
+    });
+  }
+
 
   void createSchedule() {
     if (players.length < 4) {
@@ -43,6 +69,8 @@ class Tournament extends HiveObject {
 
     schedule.clear();
 
+    players.shuffle();
+
     // Create all possible pairs from players
     List<Team> pairs = [];
     for (int i = 0; i < players.length; i++) {
@@ -50,9 +78,6 @@ class Tournament extends HiveObject {
         pairs.add(Team(player1: players[i], player2: players[j]));
       }
     }
-
-    // Shuffle the pairs
-    // pairs.shuffle();
 
     int matchesInRound = (players.length / 4).floor();
     int pairsInRound = matchesInRound * 2;
@@ -83,8 +108,9 @@ class Tournament extends HiveObject {
         }
       }
 
+      sortTeamsByCommonPlayers(pairs);
       printTeams(teams);
-      printTeams(pairs);
+      printTeams(pairs, splitter: '\n\n');
 
       // Create matches for selected teams
       for (int j = 0; j < teams.length; j += 2) {
@@ -106,6 +132,10 @@ class Tournament extends HiveObject {
       } else {
         break;
       }      
+    }
+
+    if (pairs.isNotEmpty) {
+      drawPair.add(pairs[0]);
     }    
   }
 }

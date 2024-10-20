@@ -141,6 +141,10 @@ class TournamentHomePageState extends State<TournamentHomePage> {
     for (var player in tournament.players) {
       buffer.writeln(' - ${player.name} (ID: ${player.id})');
     }
+    if (tournament.drawPair.isNotEmpty) {
+      Team drawPair = tournament.drawPair[0];
+      buffer.writeln('Draw pair: ${drawPair.player1.name} (${drawPair.player1.id}) & ${drawPair.player2.name} (${drawPair.player2.id})');
+    }
     buffer.writeln('Schedule:');
     for (var round in tournament.schedule) {
       buffer.writeln(' Round ${round.roundNumber}:');

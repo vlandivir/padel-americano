@@ -22,13 +22,14 @@ class TournamentAdapter extends TypeAdapter<Tournament> {
       numberOfCourts: fields[2] as int,
     )
       ..players = (fields[3] as List).cast<Player>()
-      ..schedule = (fields[4] as List).cast<Round>();
+      ..schedule = (fields[4] as List).cast<Round>()
+      ..drawPair = (fields[5] as List).cast<Team>();
   }
 
   @override
   void write(BinaryWriter writer, Tournament obj) {
     writer
-      ..writeByte(5)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.name)
       ..writeByte(1)
@@ -38,7 +39,9 @@ class TournamentAdapter extends TypeAdapter<Tournament> {
       ..writeByte(3)
       ..write(obj.players)
       ..writeByte(4)
-      ..write(obj.schedule);
+      ..write(obj.schedule)
+      ..writeByte(5)
+      ..write(obj.drawPair);
   }
 
   @override
