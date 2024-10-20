@@ -49,67 +49,82 @@ class _TournamentHomePageState extends State<TournamentHomePage> {
         title: const Text('Tournaments'),
         actions: [],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Column(
-              children: [
-                TextField(
-                  controller: _numberOfPlayersController,
-                  decoration: InputDecoration(
-                    labelText: 'Number of Players',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: 600),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _numberOfPlayersController,
+                      decoration: InputDecoration(
+                        labelText: 'Number of Players',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                    SizedBox(height: 8),
+                    TextField(
+                      controller: _numberOfCourtsController,
+                      decoration: InputDecoration(
+                        labelText: 'Number of Courts',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                    SizedBox(height: 8),
+                    TextField(
+                      controller: _numberOfPointsController,
+                      decoration: InputDecoration(
+                        labelText: 'Number of Points',
+                        border: OutlineInputBorder(),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+                    SizedBox(height: 16),
+                    ElevatedButton(
+                      onPressed: createTournament,
+                      child: Text('Create Tournament'),
+                    ),
+                  ],
                 ),
-                SizedBox(height: 8),
-                TextField(
-                  controller: _numberOfCourtsController,
-                  decoration: InputDecoration(
-                    labelText: 'Number of Courts',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-                SizedBox(height: 8),
-                TextField(
-                  controller: _numberOfPointsController,
-                  decoration: InputDecoration(
-                    labelText: 'Number of Points',
-                    border: OutlineInputBorder(),
-                  ),
-                  keyboardType: TextInputType.number,
-                ),
-                SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: createTournament,
-                  child: Text('Create Tournament'),
-                ),
-              ],
+              ),
             ),
-          ),
-          Expanded(
-            child: ValueListenableBuilder(
-              valueListenable: Hive.box<Tournament>('tournamentBox').listenable(),
-              builder: (context, Box<Tournament> box, _) {
-                if (box.values.isEmpty) {
-                  return Center(child: Text('No Tournaments Created'));
-                }
-                return ListView.builder(
-                  itemCount: box.values.length,
-                  itemBuilder: (context, index) {
-                    final tournament = box.getAt(index);
-                    return ListTile(
-                      title: Text(tournament?.name ?? 'Unnamed Tournament'),
-                      subtitle: Text(_formatTournamentInfo(tournament!)),
-                    );
-                  },
-                );
-              },
+            Expanded(
+              child: ValueListenableBuilder(
+                valueListenable: Hive.box<Tournament>('tournamentBox').listenable(),
+                builder: (context, Box<Tournament> box, _) {
+                  if (box.values.isEmpty) {
+                    return Center(child: Text('No Tournaments Created'));
+                  }
+                  return ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: 600),
+                    child: ListView.builder(
+                      itemCount: box.values.length,
+                      itemBuilder: (context, index) {
+                        final tournament = box.getAt(index);
+                        if (tournament == null) {
+                          return ListTile(
+                            title: Text('Unnamed Tournament'),
+                            subtitle: Text('No information available'),
+                          );
+                        }
+                        return ListTile(
+                          title: Text(tournament.name),
+                          subtitle: Text(_formatTournamentInfo(tournament)),
+                        );
+                      },
+                    ),
+                  );
+                },
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
