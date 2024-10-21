@@ -23,7 +23,7 @@ class TournamentAdapter extends TypeAdapter<Tournament> {
     )
       ..players = (fields[3] as List).cast<Player>()
       ..schedule = (fields[4] as List).cast<Round>()
-      ..drawPair = (fields[5] as List).cast<Team>();
+      ..drawPairs = (fields[5] as List).cast<Team>();
   }
 
   @override
@@ -41,7 +41,7 @@ class TournamentAdapter extends TypeAdapter<Tournament> {
       ..writeByte(4)
       ..write(obj.schedule)
       ..writeByte(5)
-      ..write(obj.drawPair);
+      ..write(obj.drawPairs);
   }
 
   @override

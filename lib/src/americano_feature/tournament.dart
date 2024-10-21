@@ -20,7 +20,7 @@ class Tournament extends HiveObject {
   List<Round> schedule = [];
 
   @HiveField(5)
-  List<Team> drawPair = [];
+  List<Team> drawPairs = [];
 
   Tournament({required this.name, required this.numberOfPoints, required this.numberOfCourts});
 
@@ -69,7 +69,7 @@ class Tournament extends HiveObject {
 
     schedule.clear();
 
-    players.shuffle();
+    // players.shuffle();
 
     // Create all possible pairs from players
     List<Team> pairs = [];
@@ -98,9 +98,10 @@ class Tournament extends HiveObject {
         if (!usedPlayers.contains(currentTeam.player1) && !usedPlayers.contains(currentTeam.player2)) {
           teams.add(currentTeam);
           pairs.remove(currentTeam);
-          j -= 1;
           usedPlayers.add(currentTeam.player1);
           usedPlayers.add(currentTeam.player2);
+          sortTeamsByCommonPlayers(pairs);
+          j = -1; // because it will be increased by for statement
         }
 
         if (teams.length == pairsInRound) {
@@ -108,9 +109,22 @@ class Tournament extends HiveObject {
         }
       }
 
-      sortTeamsByCommonPlayers(pairs);
       printTeams(teams);
       printTeams(pairs, splitter: '\n\n');
+
+      if (pairs.isNotEmpty && pairs.length + teams.length < pairsInRound * 2 - 1) {
+        // ignore: avoid_print
+        print("Can't create schedule");
+        break;
+      }
+
+      if (teams.length < pairsInRound) {
+        // Didn't find enought teams for round. Trying to resort
+        usedPlayers = [];
+        pairs.addAll(teams);
+        i -= 1;
+        continue;
+      }
 
       // Create matches for selected teams
       for (int j = 0; j < teams.length; j += 2) {
@@ -135,7 +149,7 @@ class Tournament extends HiveObject {
     }
 
     if (pairs.isNotEmpty) {
-      drawPair.add(pairs[0]);
+      drawPairs.addAll(pairs);
     }    
   }
 }
