@@ -51,16 +51,24 @@ class Tournament extends HiveObject {
       playerCounts.update(team.player2, (count) => count + 1, ifAbsent: () => 1);
     }
 
-    // Sort pairs based on the sum of occurrences of their players,
+    // Sort pairs based on the max count of their players, then by min count,
     // then by minimal player ID, and finally by maximum player ID
     pairs.sort((a, b) {
-      int aCount = playerCounts[a.player1]! + playerCounts[a.player2]!;
-      int bCount = playerCounts[b.player1]! + playerCounts[b.player2]!;
-      
-      // First, sort by the sum of occurrences in descending order
-      int compareCount = bCount.compareTo(aCount);
-      if (compareCount != 0) {
-        return compareCount;
+      int aMaxCount = playerCounts[a.player1]! > playerCounts[a.player2]! ? playerCounts[a.player1]! : playerCounts[a.player2]!;
+      int aMinCount = playerCounts[a.player1]! < playerCounts[a.player2]! ? playerCounts[a.player1]! : playerCounts[a.player2]!;
+      int bMaxCount = playerCounts[b.player1]! > playerCounts[b.player2]! ? playerCounts[b.player1]! : playerCounts[b.player2]!;
+      int bMinCount = playerCounts[b.player1]! < playerCounts[b.player2]! ? playerCounts[b.player1]! : playerCounts[b.player2]!;
+
+      // First, compare by max count in descending order
+      int compareMaxCount = bMaxCount.compareTo(aMaxCount);
+      if (compareMaxCount != 0) {
+        return compareMaxCount;
+      }
+
+      // If max counts are equal, compare by min count in descending order
+      int compareMinCount = bMinCount.compareTo(aMinCount);
+      if (compareMinCount != 0) {
+        return compareMinCount;
       }
 
       // If counts are equal, sort by minimal player ID
