@@ -13,7 +13,7 @@ class TournamentHomePage extends StatefulWidget {
 }
 class TournamentHomePageState extends State<TournamentHomePage> {
   late Box<Tournament> tournamentBox;
-  final TextEditingController _numberOfPlayersController = TextEditingController(text: '8');
+  final TextEditingController _numberOfPlayersController = TextEditingController(text: '9');
   final TextEditingController _numberOfCourtsController = TextEditingController(text: '2');
   final TextEditingController _numberOfPointsController = TextEditingController(text: '16');
 
@@ -33,7 +33,7 @@ class TournamentHomePageState extends State<TournamentHomePage> {
   }
 
   void createTournament() {
-    final numberOfPlayers = int.tryParse(_numberOfPlayersController.text) ?? 8;
+    final numberOfPlayers = int.tryParse(_numberOfPlayersController.text) ?? 9;
     final numberOfCourts = int.tryParse(_numberOfCourtsController.text) ?? 2;
     final numberOfPoints = int.tryParse(_numberOfPointsController.text) ?? 16;
 
@@ -150,7 +150,7 @@ class TournamentHomePageState extends State<TournamentHomePage> {
 
       }
     }
-    
+
     buffer.writeln('Schedule:');
     for (var round in tournament.schedule) {
       buffer.writeln(' Round ${round.roundNumber}:');

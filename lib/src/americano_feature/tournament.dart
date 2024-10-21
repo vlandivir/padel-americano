@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 part 'tournament.g.dart';
@@ -28,6 +29,25 @@ class Tournament extends HiveObject {
     players.add(Player(name: playerName, id: playerId));
   }
 
+  Map<Player, int> countPlayers(List<Team> pairs) {
+    Map<Player, int> playerCounts = {};
+
+    // Count how many times each player appears in the list of pairs
+    for (Team team in pairs) {
+      playerCounts.update(team.player1, (count) => count + 1, ifAbsent: () => 1);
+      playerCounts.update(team.player2, (count) => count + 1, ifAbsent: () => 1);
+    }
+
+    return playerCounts;
+  }
+
+  void printCounts(Map<Player, int> playerCounts) {
+    for(var entry in playerCounts.entries) {
+      // ignore: avoid_print
+      print('${entry.key.name} ${entry.value}');
+    }
+  }
+
   void printTeams(List<Team> teams, {String splitter = ""}) {
     // ignore: avoid_print
     print('--- ${teams.length} ---');
@@ -43,7 +63,7 @@ class Tournament extends HiveObject {
 
   void sortTeamsByCommonPlayers(List<Team> pairs) {
     // Create a map to count the occurrences of each player
-    Map<Player, int> playerCounts = {};
+    Map<Player, int> playerCounts = countPlayers(pairs);
 
     // Count how many times each player appears in the list of pairs
     for (Team team in pairs) {
@@ -65,6 +85,11 @@ class Tournament extends HiveObject {
         return compareMaxCount;
       }
 
+      int compareSum = (bMaxCount + bMinCount).compareTo(aMaxCount + aMinCount);
+      if (compareSum != 0) {
+        return compareSum;
+      }
+
       // If max counts are equal, compare by min count in descending order
       int compareMinCount = bMinCount.compareTo(aMinCount);
       if (compareMinCount != 0) {
@@ -72,17 +97,19 @@ class Tournament extends HiveObject {
       }
 
       // If counts are equal, sort by minimal player ID
-      int aMinId = a.player1.id < a.player2.id ? a.player1.id : a.player2.id;
-      int bMinId = b.player1.id < b.player2.id ? b.player1.id : b.player2.id;
-      int compareMinId = aMinId.compareTo(bMinId);
-      if (compareMinId != 0) {
-        return compareMinId;
-      }
+      // int aMinId = a.player1.id < a.player2.id ? a.player1.id : a.player2.id;
+      // int bMinId = b.player1.id < b.player2.id ? b.player1.id : b.player2.id;
+      // int compareMinId = aMinId.compareTo(bMinId);
+      // if (compareMinId != 0) {
+      //   return compareMinId;
+      // }
 
-      // If minimal player IDs are also equal, sort by maximum player ID
-      int aMaxId = a.player1.id > a.player2.id ? a.player1.id : a.player2.id;
-      int bMaxId = b.player1.id > b.player2.id ? b.player1.id : b.player2.id;
-      return aMaxId.compareTo(bMaxId);
+      // // If minimal player IDs are also equal, sort by maximum player ID
+      // int aMaxId = a.player1.id > a.player2.id ? a.player1.id : a.player2.id;
+      // int bMaxId = b.player1.id > b.player2.id ? b.player1.id : b.player2.id;
+      // return aMaxId.compareTo(bMaxId);
+
+      return 0;
     });
   }
 
@@ -111,21 +138,20 @@ class Tournament extends HiveObject {
 
     int currentCourt = 1;
 
-    // List<Player> usedPlayers;
+    List<Team> filtered = [];
 
     for (int i = 0; i < roundsNumber; i += 1) {
       List<Match> matches = [];
-      
       List<Team> teams = [];
-      List<Team> filtered = [];
-      // usedPlayers = [];
 
       while(teams.length < pairsInRound && pairs.isNotEmpty) {
+        sortTeamsByCommonPlayers(pairs);
+
         Team currentTeam = pairs[0];
         teams.add(currentTeam);
         pairs.remove(currentTeam);
         
-        for(int j = pairs.length - 1; j > 0; j -= 1) {
+        for(int j = pairs.length - 1; j > -1; j -= 1) {
           Team currentPair = pairs[j];
           if (
             currentPair.player1 == currentTeam.player1 || 
@@ -137,30 +163,13 @@ class Tournament extends HiveObject {
             pairs.remove(currentPair);
           }
         }
-
-        sortTeamsByCommonPlayers(pairs);
       }
 
-      // Select teams for round
-      // for (int j = 0; j < pairs.length; j += 1) {
-      //   Team currentTeam = pairs[j];
-      //   if (!usedPlayers.contains(currentTeam.player1) && !usedPlayers.contains(currentTeam.player2)) {
-      //     teams.add(currentTeam);
-      //     pairs.remove(currentTeam);
-      //     usedPlayers.add(currentTeam.player1);
-      //     usedPlayers.add(currentTeam.player2);
-      //     // sortTeamsByCommonPlayers(pairs);
-      //     j = -1; // because it will be increased by for statement
-      //   }
-
-      //   if (teams.length == pairsInRound) {
-      //     break;
-      //   }
-      // }
       pairs.addAll(filtered);
+      filtered = [];
 
-      sortTeamsByCommonPlayers(pairs);
       printTeams(teams);
+      printCounts(countPlayers(pairs));
       printTeams(pairs, splitter: '\n\n');
 
       // if (pairs.isNotEmpty && pairs.length + teams.length < pairsInRound * 2 - 1) {
@@ -169,12 +178,12 @@ class Tournament extends HiveObject {
       //   break;
       // }
 
-      // if (teams.length < pairsInRound) {
-      //   // Didn't find enought teams for round. Trying to resort
-      //   pairs.addAll(teams);
-      //   i -= 1;
-      //   continue;
-      // }
+      if (teams.length < pairsInRound) {
+        // Didn't find enought teams for round. Trying to resort
+        filtered.addAll(teams);
+        i -= 1;
+        continue;
+      }
 
       // Create matches for selected teams
       for (int j = 0; j < teams.length; j += 2) {
