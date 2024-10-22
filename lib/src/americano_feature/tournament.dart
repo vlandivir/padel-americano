@@ -64,7 +64,7 @@ class Tournament extends HiveObject {
     print('--- ${teams.length} ---');
     for (var team in teams) {
       // ignore: avoid_print
-      print('Team: ${team.player1.name} & ${team.player2.name}');
+      print('Team: ${team.player1.name} (${team.player1.id}) & ${team.player2.name} (${team.player2.id})');
     }
     if (splitter != "") {
       // ignore: avoid_print
@@ -72,7 +72,7 @@ class Tournament extends HiveObject {
     }
   }
 
-  void sortTeamsByCommonPlayers(List<Team> pairs, int count) {
+  void sortTeamsByCommonPlayers(List<Team> pairs) {
     // Create a map to count the occurrences of each player
     Map<Player, int> playerCounts = countPlayers(pairs);
 
@@ -102,26 +102,21 @@ class Tournament extends HiveObject {
         return compareMinCount;
       }
 
-      // int compareSum = (bMaxCount + bMinCount).compareTo(aMaxCount + aMinCount);
-      // if (compareSum != 0) {
-      //   return compareSum;
-      // }
-
       // If counts are equal, sort by minimal player ID
-      // int aMinId = a.player1.id < a.player2.id ? a.player1.id : a.player2.id;
-      // int bMinId = b.player1.id < b.player2.id ? b.player1.id : b.player2.id;
-      // int compareMinId = aMinId.compareTo(bMinId);
-      // if (compareMinId != 0) {
-      //   return compareMinId;
-      // }
+      int aMinId = a.player1.id < a.player2.id ? a.player1.id : a.player2.id;
+      int bMinId = b.player1.id < b.player2.id ? b.player1.id : b.player2.id;
+      int compareMinId = aMinId.compareTo(bMinId);
+      if (compareMinId != 0) {
+        return compareMinId;
+      }
 
       // If minimal player IDs are also equal, sort by maximum player ID
-      // int aMaxId = a.player1.id > a.player2.id ? a.player1.id : a.player2.id;
-      // int bMaxId = b.player1.id > b.player2.id ? b.player1.id : b.player2.id;
-      // int compareMaxId = aMaxId.compareTo(bMaxId);
-      // if (compareMaxId != 0) {
-      //   return compareMaxId;
-      // }
+      int aMaxId = a.player1.id > a.player2.id ? a.player1.id : a.player2.id;
+      int bMaxId = b.player1.id > b.player2.id ? b.player1.id : b.player2.id;
+      int compareMaxId = aMaxId.compareTo(bMaxId);
+      if (compareMaxId != 0) {
+        return compareMaxId;
+      }
  
       return 0;
     });
@@ -146,121 +141,45 @@ class Tournament extends HiveObject {
       }
     }
 
-    int matchesInRound = (players.length / 4).floor();
-    int pairsInRound = matchesInRound * 2;
-    int roundsNumber = (pairs.length / 2 / matchesInRound).floor();
+    List<Team> sortedTeams = [];
+    // Map<Player, int> usedPlayers = {};
 
-    int currentCourt = 1;
-
-    List<Team> filtered = [];
-
-    int escapeCount = 0;
-    sortTeamsByCommonPlayers(pairs, players.length);
-
-    for (int i = 0; i < roundsNumber; i += 1) {
-      List<Match> matches = [];
-      List<Team> teams = [];
-
-      int shift = 0;
-  
-      while(teams.length < pairsInRound && pairs.isNotEmpty) {
-        Team currentTeam = pairs[0];
-        teams.add(currentTeam);
-        pairs.remove(currentTeam);
-        
-        for(int j = pairs.length - 1; j > -1; j -= 1) {
-          Team currentPair = pairs[j];
+    int escape = 0;
+    while(pairs.isNotEmpty && escape < 1000) {
+      Team team = pairs.first;
+      
+      if (sortedTeams.isNotEmpty) {
+        Team previousTeam = sortedTeams.last;
+        for (int i = 0; i < pairs.length; i += 1) {
+          Team currentTeam = pairs[i];
           if (
-            currentPair.player1 == currentTeam.player1 || 
-            currentPair.player1 == currentTeam.player2 ||
-            currentPair.player2 == currentTeam.player1 || 
-            currentPair.player2 == currentTeam.player2
+            previousTeam.player1.id == currentTeam.player1.id ||
+            previousTeam.player1.id == currentTeam.player2.id ||
+            previousTeam.player2.id == currentTeam.player1.id ||
+            previousTeam.player2.id == currentTeam.player2.id
           ) {
-            filtered.add(currentPair);
-            pairs.remove(currentPair);
+            continue;
           }
-        }
-
-
-        bool notEnoughTeams = pairs.isEmpty && teams.length < pairsInRound;
-        bool brokenLastRound = pairs.isEmpty && filtered.length <= pairsInRound && getMaxPlayerCount(filtered) > 1;
-
-        if (notEnoughTeams || brokenLastRound) {
-          // print('notEnoughTeams: $notEnoughTeams')
-          escapeCount++;
-
-          if (escapeCount > 999) {
-            break;
-          }
-
-          List<Team> tmp = [];
-
-          tmp.addAll(filtered);
-          tmp.addAll(teams);
-          sortTeamsByCommonPlayers(tmp, players.length);
-
-          shift += 1;
-
-          // if (shift >= tmp.length) {
-          //   tmp.shuffle();
-          //   shift = 0;
-          // } 
-
-          pairs.addAll(tmp.sublist(shift));
-          pairs.addAll(tmp.sublist(0, shift));
-
-          filtered = [];
-          teams = [];
+          
+          team = currentTeam;
+          break;
         }
       }
 
-      pairs.addAll(filtered);
-      filtered = [];
+      pairs.remove(team);
+      sortedTeams.add(team);
 
-      sortTeamsByCommonPlayers(pairs, players.length);
-      // ignore: avoid_print
-      print('Round: ${i + 1}. Escape count: $escapeCount');
-      printTeams(teams);
-      printTeams(pairs, splitter: '\n\n');
-
-      // if (pairs.isNotEmpty && pairs.length + teams.length < pairsInRound * 2 - 1) {
-      //   // ignore: avoid_print
-      //   print("Can't create schedule");
-      //   break;
-      // }
-
-      // if (teams.length < pairsInRound) {
-      //   // Didn't find enought teams for round. Trying to resort
-      //   filtered.addAll(teams);
-      //   i -= 1;
-      //   continue;
-      // }
-
-      // Create matches for selected teams
-      for (int j = 0; j < teams.length; j += 2) {
-        matches.add(Match(
-          courtNumber: currentCourt,
-          team1: teams[j + 0],
-          team2: teams[j + 1],
-        ));
-
-        currentCourt += 1;
-        if (currentCourt > numberOfCourts) {
-          currentCourt = 1;
-        } 
-      }
-
-      // Create round
-      if (matches.isNotEmpty) {
-        schedule.add(Round(roundNumber: i + 1, matches: matches));
-      } else {
-        break;
-      }      
+      sortTeamsByCommonPlayers(pairs);
+      escape += 1;
     }
 
-    if (pairs.isNotEmpty) {
-      drawPairs.addAll(pairs);
-    }    
+    // printTeams(sortedTeams);
+    // printTeams(pairs, splitter: "\n\n");
+
+    int matchesInRound = (players.length / 4).floor();
+    int roundsNumber = (pairs.length / 2 / matchesInRound).floor();
+
+    
   }
 }
 
