@@ -108,12 +108,12 @@ class Tournament extends HiveObject {
       // }
 
       // If counts are equal, sort by minimal player ID
-      int aMinId = a.player1.id < a.player2.id ? a.player1.id : a.player2.id;
-      int bMinId = b.player1.id < b.player2.id ? b.player1.id : b.player2.id;
-      int compareMinId = aMinId.compareTo(bMinId);
-      if (compareMinId != 0) {
-        return compareMinId;
-      }
+      // int aMinId = a.player1.id < a.player2.id ? a.player1.id : a.player2.id;
+      // int bMinId = b.player1.id < b.player2.id ? b.player1.id : b.player2.id;
+      // int compareMinId = aMinId.compareTo(bMinId);
+      // if (compareMinId != 0) {
+      //   return compareMinId;
+      // }
 
       // If minimal player IDs are also equal, sort by maximum player ID
       // int aMaxId = a.player1.id > a.player2.id ? a.player1.id : a.player2.id;
