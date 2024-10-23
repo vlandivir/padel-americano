@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:hive/hive.dart';
 
 part 'tournament.g.dart';
@@ -23,6 +25,36 @@ class Tournament extends HiveObject {
   List<Team> drawPairs = [];
 
   Tournament({required this.name, required this.numberOfPoints, required this.numberOfCourts});
+
+  String formatTournamentInfo(Tournament tournament) {
+    final buffer = StringBuffer();
+    buffer.writeln('Points: ${tournament.numberOfPoints}');
+    buffer.writeln('Courts: ${tournament.numberOfCourts}');
+    buffer.writeln('Players:');
+    for (var player in tournament.players) {
+      buffer.writeln(' - ${player.name} (ID: ${player.id})');
+    }
+
+    if (tournament.drawPairs.isNotEmpty) {
+      buffer.writeln('Draw pairs:');
+      for (int i = 0; i <tournament.drawPairs.length; i += 1) {
+        Team drawPair = tournament.drawPairs[i];
+        buffer.writeln('${drawPair.player1.name} (${drawPair.player1.id}) & ${drawPair.player2.name} (${drawPair.player2.id})');
+
+      }
+    }
+
+    buffer.writeln('Schedule:');
+    for (var round in tournament.schedule) {
+      buffer.writeln(' Round ${round.roundNumber}:');
+      for (var match in round.matches) {
+        final team1 = '${match.team1.player1.name} (${match.team1.player1.id}) & ${match.team1.player2.name} (${match.team1.player2.id})';
+        final team2 = '${match.team2.player1.name} (${match.team2.player1.id}) & ${match.team2.player2.name} (${match.team2.player2.id})';
+        buffer.writeln('  Court ${match.courtNumber}: $team1 vs $team2');
+      }
+    }
+    return buffer.toString();
+  }  
 
   void addPlayer(String playerName, int playerId) {
     players.add(Player(name: playerName, id: playerId));
@@ -54,20 +86,16 @@ class Tournament extends HiveObject {
 
   void printCounts(Map<Player, int> playerCounts) {
     for(var entry in playerCounts.entries) {
-      // ignore: avoid_print
       print('${entry.key.name} ${entry.value}');
     }
   }
 
   void printTeams(List<Team> teams, {String splitter = ""}) {
-    // ignore: avoid_print
     print('--- ${teams.length} ---');
     for (var team in teams) {
-      // ignore: avoid_print
       print('Team: ${team.player1.name} (${team.player1.id}) & ${team.player2.name} (${team.player2.id})');
     }
     if (splitter != "") {
-      // ignore: avoid_print
       print(splitter);
     }
   }
@@ -124,7 +152,6 @@ class Tournament extends HiveObject {
 
   void createSchedule() {
     if (players.length < 4) {
-      // ignore: avoid_print
       print('Not enough players to create a schedule. At least 4 players are required.');
       return;
     }
@@ -176,10 +203,155 @@ class Tournament extends HiveObject {
     // printTeams(sortedTeams);
     // printTeams(pairs, splitter: "\n\n");
 
-    int matchesInRound = (players.length / 4).floor();
-    int roundsNumber = (pairs.length / 2 / matchesInRound).floor();
+    List<Match> initialMatches = [];
+    int currentCourt = 1;
 
-    
+    for (int i = 0; i < sortedTeams.length; i += 2) {
+      
+      if (i + 1 >= sortedTeams.length) {
+        drawPairs.add(sortedTeams[i]);
+        break;
+      }
+
+      initialMatches.add(Match(
+        courtNumber: currentCourt,
+        team1: sortedTeams[i + 0],
+        team2: sortedTeams[i + 1],
+      ));
+      
+      currentCourt += 1;
+      if (currentCourt > numberOfCourts) {
+        currentCourt = 1;
+      } 
+    }
+
+    int matchesInRound = (players.length / 4).floor();
+    int playersInRound = matchesInRound * 4;
+    List<int> lastPlayers = [];
+
+    List<Match> sortedMatches = [];
+    // while(matches.isNotEmpty && escape < 1000) {
+    //   Match currentMatch = matches.first;
+    //   List<int> currentPlayers = [];
+
+    //   for (int i = 0; i < matches.length; i += 1) {
+    //     currentMatch = matches[i];
+    //     currentPlayers = [];
+    //     currentPlayers.add(currentMatch.team1.player1.id);
+    //     currentPlayers.add(currentMatch.team1.player2.id);
+    //     currentPlayers.add(currentMatch.team2.player1.id);
+    //     currentPlayers.add(currentMatch.team2.player2.id);
+
+    //     if (
+    //       lastPlayers.contains(currentPlayers[0]) ||
+    //       lastPlayers.contains(currentPlayers[1]) ||
+    //       lastPlayers.contains(currentPlayers[2]) ||
+    //       lastPlayers.contains(currentPlayers[3])
+    //     ) {
+    //       continue;
+    //     }
+        
+    //     break;
+    //   }
+
+    //   sortedMatches.add(currentMatch);
+    //   matches.remove(currentMatch);
+    //   lastPlayers.addAll(currentPlayers);
+    //   if (lastPlayers.length >= playersInRound) {
+    //     lastPlayers = lastPlayers.sublist(4);
+    //   }
+
+    //   escape += 1;
+    // }
+
+    sortedMatches.addAll(initialMatches);
+
+    List<List<int>> matches = [];
+    for (int i = 0; i < initialMatches.length; i += 1) {
+      Match m = initialMatches[i];
+      List<int> players = [];
+      players.add(m.team1.player1.id);
+      players.add(m.team1.player2.id);
+      players.add(m.team2.player1.id);
+      players.add(m.team2.player2.id);
+      matches.add(players);
+    }
+    print(matches);
+
+    Map<int, Set<int>> graph = {};
+    for (int i = 0; i < matches.length; i++) {
+      graph[i] = {};
+    }
+
+    for (int i = 0; i < matches.length; i++) {
+      for (int j = i + 1; j < matches.length; j++) {
+        Set<int> playersMatchI = matches[i].toSet();
+        Set<int> playersMatchJ = matches[j].toSet();
+
+        if (playersMatchI.intersection(playersMatchJ).isNotEmpty) {
+          graph[i]!.add(j);
+          graph[j]!.add(i);
+        }
+      }
+    }
+
+    List<int> order = graph.keys.toList()
+      ..sort((a, b) => graph[b]!.length.compareTo(graph[a]!.length));
+
+    Map<int, int> colors = {};
+    for (int vertex in order) {
+      Set<int> usedColors = {};
+      for (int neighbor in graph[vertex]!) {
+        if (colors.containsKey(neighbor)) {
+          usedColors.add(colors[neighbor]!);
+        }
+      }
+
+      int color = 0;
+      while (usedColors.contains(color)) {
+        color++;
+      }
+      colors[vertex] = color;
+    }
+
+    Map<int, List<int>> rounds = {};
+    colors.forEach((match, color) {
+      rounds.putIfAbsent(color, () => []).add(match);
+    });
+
+    // Вывод расписания
+    List<int> sortedRounds = rounds.keys.toList()..sort();
+    for (int roundNumber in sortedRounds) {
+      print('Раунд ${roundNumber + 1}:');
+      for (int match in rounds[roundNumber]!) {
+        String players = matches[match].map((player) => 'Игрок $player').join(', ');
+        print('  Матч $match: $players');
+      }
+    }
+
+    for (int roundNumber in rounds.keys) {
+      Set<int> playersInRound = {};
+      for (int match in rounds[roundNumber]!) {
+        for (int player in matches[match]) {
+          if (playersInRound.contains(player)) {
+            print('Конфликт: Игрок $player участвует более одного раза в раунде ${roundNumber + 1}');
+          }
+          playersInRound.add(player);
+        }
+      }
+    }    
+    // int currentRound = 1;
+
+    // for (int i = 0; i < sortedMatches.length;) {
+    //   List<Match> roundMatches = [];
+    //   for (int j = 0; j < matchesInRound && i < sortedMatches.length; i += 1, j += 1) {
+    //     roundMatches.add(sortedMatches[i]);
+    //   }
+    //   schedule.add(Round(roundNumber: currentRound, matches: roundMatches));
+    //   currentRound += 1;
+    // }  
+
+    // print(formatTournamentInfo(this));  
   }
 }
 

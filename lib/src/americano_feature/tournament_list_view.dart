@@ -119,7 +119,7 @@ class TournamentHomePageState extends State<TournamentHomePage> {
                         }
                         return ListTile(
                           title: Text(tournament.name),
-                          subtitle: Text(_formatTournamentInfo(tournament)),
+                          subtitle: Text(tournament.formatTournamentInfo(tournament)),
                         );
                       },
                     ),
@@ -132,34 +132,4 @@ class TournamentHomePageState extends State<TournamentHomePage> {
       ),
     );
   }
-
-  String _formatTournamentInfo(Tournament tournament) {
-    final buffer = StringBuffer();
-    buffer.writeln('Points: ${tournament.numberOfPoints}');
-    buffer.writeln('Courts: ${tournament.numberOfCourts}');
-    buffer.writeln('Players:');
-    for (var player in tournament.players) {
-      buffer.writeln(' - ${player.name} (ID: ${player.id})');
-    }
-
-    if (tournament.drawPairs.isNotEmpty) {
-      buffer.writeln('Draw pairs:');
-      for (int i = 0; i <tournament.drawPairs.length; i += 1) {
-        Team drawPair = tournament.drawPairs[i];
-        buffer.writeln('${drawPair.player1.name} (${drawPair.player1.id}) & ${drawPair.player2.name} (${drawPair.player2.id})');
-
-      }
-    }
-
-    buffer.writeln('Schedule:');
-    for (var round in tournament.schedule) {
-      buffer.writeln(' Round ${round.roundNumber}:');
-      for (var match in round.matches) {
-        final team1 = '${match.team1.player1.name} (${match.team1.player1.id}) & ${match.team1.player2.name} (${match.team1.player2.id})';
-        final team2 = '${match.team2.player1.name} (${match.team2.player1.id}) & ${match.team2.player2.name} (${match.team2.player2.id})';
-        buffer.writeln('  Court ${match.courtNumber}: $team1 vs $team2');
-      }
-    }
-    return buffer.toString();
-  }  
 }
