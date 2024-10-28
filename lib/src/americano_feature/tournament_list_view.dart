@@ -11,14 +11,20 @@ class TournamentHomePage extends StatefulWidget {
   @override
   TournamentHomePageState createState() => TournamentHomePageState();
 }
+
+const defaultPlayersNumber = 12;
+const defaultCourtsNumber = 2;
+const defaultPointsNumber = 16;
+
 class TournamentHomePageState extends State<TournamentHomePage> {
   late Box<Tournament> tournamentBox;
-  final TextEditingController _numberOfPlayersController = TextEditingController(text: '9');
-  final TextEditingController _numberOfCourtsController = TextEditingController(text: '2');
-  final TextEditingController _numberOfPointsController = TextEditingController(text: '16');
+  final TextEditingController _numberOfPlayersController = TextEditingController(text: defaultPlayersNumber.toString());
+  final TextEditingController _numberOfCourtsController = TextEditingController(text: defaultCourtsNumber.toString());
+  final TextEditingController _numberOfPointsController = TextEditingController(text: defaultPointsNumber.toString());
 
   final List<String> playerNames = [
-    'Alice', 'Bob', 'Charlie', 'David', 'Eve', 'Frank', 'Grace', 'Hank', 'Ivy', 'Jack', 'Kathy', 'Leo', 'Mia', 'Nancy', 'Oscar', 'Paul', 'Quincy', 'Rachel', 'Steve', 'Tracy', 'Uma', 'Vince', 'Wendy', 'Xander', 'Yara', 'Zack'
+    'Alice', 'Bob', 'Charlie', 'David', 'Eve', 'Frank', 'Grace', 'Hank', 'Ivy', 'Jack', 'Kathy', 'Leo', 'Mia', 
+    'Nancy', 'Oscar', 'Paul', 'Quincy', 'Rachel', 'Steve', 'Tracy', 'Uma', 'Vince', 'Wendy', 'Xander', 'Yara', 'Zack'
   ];
 
   @override
@@ -33,11 +39,17 @@ class TournamentHomePageState extends State<TournamentHomePage> {
   }
 
   void createTournament() {
-    final numberOfPlayers = int.tryParse(_numberOfPlayersController.text) ?? 9;
-    final numberOfCourts = int.tryParse(_numberOfCourtsController.text) ?? 2;
-    final numberOfPoints = int.tryParse(_numberOfPointsController.text) ?? 16;
+    final numberOfPlayers = int.tryParse(_numberOfPlayersController.text) ?? defaultPlayersNumber;
+    final numberOfCourts = int.tryParse(_numberOfCourtsController.text) ?? defaultCourtsNumber;
+    final numberOfPoints = int.tryParse(_numberOfPointsController.text) ?? defaultPointsNumber;
 
     final tournament = Tournament(name: 'Americano Padel', numberOfPoints: numberOfPoints, numberOfCourts: numberOfCourts);
+
+    List<int> fibonacci = [1, 2];
+    for (int i = 2; i < playerNames.length; i++) {
+      fibonacci.add(fibonacci[i - 1] + fibonacci[i - 2]);
+    }
+
     for (int i = 0; i < numberOfPlayers && i < playerNames.length; i++) {
       tournament.addPlayer(playerNames[i], i + 1);
     }

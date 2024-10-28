@@ -278,68 +278,12 @@ class Tournament extends HiveObject {
     }
     print(matches);
 
-    Map<int, Set<int>> graph = {};
-    for (int i = 0; i < matches.length; i++) {
-      graph[i] = {};
+    for (int i = 0; i < matches.length; i += 1) {
+      List<int> m = matches[i];
+      m.sort();
+      print('${m.reduce((v, e) => v + e)}, $m');
     }
 
-    for (int i = 0; i < matches.length; i++) {
-      for (int j = i + 1; j < matches.length; j++) {
-        Set<int> playersMatchI = matches[i].toSet();
-        Set<int> playersMatchJ = matches[j].toSet();
-
-        if (playersMatchI.intersection(playersMatchJ).isNotEmpty) {
-          graph[i]!.add(j);
-          graph[j]!.add(i);
-        }
-      }
-    }
-
-    List<int> order = graph.keys.toList()
-      ..sort((a, b) => graph[b]!.length.compareTo(graph[a]!.length));
-
-    Map<int, int> colors = {};
-    for (int vertex in order) {
-      Set<int> usedColors = {};
-      for (int neighbor in graph[vertex]!) {
-        if (colors.containsKey(neighbor)) {
-          usedColors.add(colors[neighbor]!);
-        }
-      }
-
-      int color = 0;
-      while (usedColors.contains(color)) {
-        color++;
-      }
-      colors[vertex] = color;
-    }
-
-    Map<int, List<int>> rounds = {};
-    colors.forEach((match, color) {
-      rounds.putIfAbsent(color, () => []).add(match);
-    });
-
-    // Вывод расписания
-    List<int> sortedRounds = rounds.keys.toList()..sort();
-    for (int roundNumber in sortedRounds) {
-      print('Раунд ${roundNumber + 1}:');
-      for (int match in rounds[roundNumber]!) {
-        String players = matches[match].map((player) => 'Игрок $player').join(', ');
-        print('  Матч $match: $players');
-      }
-    }
-
-    for (int roundNumber in rounds.keys) {
-      Set<int> playersInRound = {};
-      for (int match in rounds[roundNumber]!) {
-        for (int player in matches[match]) {
-          if (playersInRound.contains(player)) {
-            print('Конфликт: Игрок $player участвует более одного раза в раунде ${roundNumber + 1}');
-          }
-          playersInRound.add(player);
-        }
-      }
-    }    
     // int currentRound = 1;
 
     // for (int i = 0; i < sortedMatches.length;) {
