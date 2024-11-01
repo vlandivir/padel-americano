@@ -68,15 +68,16 @@ void main() {
   // ];
 
   print(remainingPlayers);
-  playersPerMatches = [
-    1, 2, 3, 4, 
-    5, 6, 1, 2, 
-    3, 4, 5, 6,
-    1, 2, 3, 4, 
-    5, 6, 1, 2, 
-    3, 4, 5, 6,
-    1, 2, 3, 4
+  List<int> sample = [
+    1, 2, 3, 4,
+    5, 6, 1, 3,
+    2, 4, 5, 1,
+    6, 2, 4, 5,
+    3, 6, 2, 5,
+    1, 4, 3, 5,
+    6, 1, 2, 3,
   ];
+  print(sample);
 
   // Split the flat array into multiple arrays of length playersPerRound
   List<List<int>> splitPlayers = [];
