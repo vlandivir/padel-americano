@@ -55,19 +55,8 @@ void main() {
 
   // Create a flat array to store each player's opponents with (n - 1) elements
   List<int> playersPerMatches = List.generate(players * (players - 1), (index) => (index % players) + 1);
+  print(playersPerMatches);
 
-  List<int> remainingPlayers = playersPerMatches.sublist(rounds * playersPerRound);
-  playersPerMatches = playersPerMatches.sublist(0, rounds * playersPerRound);
-
-  // playersPerMatches = [
-  //   1, 2, 3, 4, 5, 6,
-  //   1, 2, 3, 4, 5, 6,
-  //   1, 2, 3, 4, 5, 6,
-  //   1, 2, 3, 4, 5, 6,
-  //   1, 2, 3, 4
-  // ];
-
-  print(remainingPlayers);
   List<int> sample = [
     1, 2, 3, 4,
     5, 6, 1, 3,
@@ -79,18 +68,6 @@ void main() {
   ];
   print(sample);
 
-  // Split the flat array into multiple arrays of length playersPerRound
-  List<List<int>> splitPlayers = [];
-  for (int i = 0; i < playersPerMatches.length; i += playersPerRound) {
-    List<int> chunk = playersPerMatches.sublist(i, (i + playersPerRound) > playersPerMatches.length ? playersPerMatches.length : (i + playersPerRound));
-    splitPlayers.add(chunk);
-  }
-
-  // Create and print the meetings matrix based on splitPlayers
-  List<List<int>> meetingsMatrix = createMeetingsMatrix(splitPlayers, players);
-  printIndented(meetingsMatrix);
-  printIndented(splitPlayers);
-
   // Create a list of all possible pairs
   List<List<int>> possiblePairs = [];
   for (int i = 1; i <= players; i++) {
@@ -98,6 +75,81 @@ void main() {
       possiblePairs.add([i, j]);
     }
   }
+
+  List<int> sortedPlayers = [];
+  List<int> playersInRound = [];
+  int shift = 0;
+
+  while(playersPerMatches.isNotEmpty) {
+    if (sortedPlayers.length % playersPerRound == 0) {
+      playersInRound = List.generate(playersPerRound, (_) => 0);
+    } 
+
+    int player1 = 0;
+    int player2 = 0;
+    List<int> pair = [];
+
+    int i = shift;
+    for (; i < playersPerMatches.length; i += 1) {
+      player1 = playersPerMatches[i];
+      if (!playersInRound.contains(player1)) {
+        break;
+      }
+    }
+    // print({sortedPlayers, playersInRound, playersPerMatches});
+
+    bool pairFound = false;
+    for (int i = shift; i < playersPerMatches.length; i += 1) {
+      player2 = playersPerMatches[i];
+      pair = [player1, player2];
+      pair.sort();
+      if (!playersInRound.contains(player2) && player2 != player1) {
+        for (int j = 0; j < possiblePairs.length; j += 1) {
+          List<int> currentPair = possiblePairs[j];
+          if (currentPair[0] == pair[0] && currentPair[1] == pair[1]) {
+            possiblePairs.remove(currentPair);
+            pairFound = true;
+            break;
+          }
+        }
+        if (pairFound) {
+          break;
+        }
+      }
+    }
+
+    if (!pairFound && shift < playersPerMatches.length) {
+      shift += 1;
+      continue;
+    }
+    shift = 0;
+
+    playersInRound.add(player1);
+    playersInRound.add(player2);
+
+    sortedPlayers.add(player1);
+    sortedPlayers.add(player2);
+    playersPerMatches.remove(player1); 
+    playersPerMatches.remove(player2);
+    playersInRound = playersInRound.sublist(2);
+
+    // print({sortedPlayers, playersInRound, playersPerMatches});
+    // break;
+  }
+
+  print(sortedPlayers);
+
+  // Split the flat array into multiple arrays of length playersPerRound
+  List<List<int>> splitPlayers = [];
+  for (int i = 0; i < sortedPlayers.length; i += playersPerRound) {
+    List<int> chunk = sortedPlayers.sublist(i, (i + playersPerRound) > sortedPlayers.length ? sortedPlayers.length : (i + playersPerRound));
+    splitPlayers.add(chunk);
+  }
+
+  // Create and print the meetings matrix based on splitPlayers
+  List<List<int>> meetingsMatrix = createMeetingsMatrix(splitPlayers, players);
+  printIndented(meetingsMatrix);
+  printIndented(splitPlayers);
 
   // Create sorted pairs
   List<List<int>> sortedPairs = [];
