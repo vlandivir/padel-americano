@@ -15,7 +15,12 @@ void printIndented(dynamic data, [int indent = 0]) {
   }
 }
 
-void splitPlayers(int players) {
+List<T> shiftLeft<T>(List<T> list, int N) {
+  int n = N % list.length; // Обработка случая, когда N больше длины списка
+  return List<T>.from(list.sublist(n))..addAll(list.sublist(0, n));
+}
+
+List<int> splitPlayers(int players) {
   int pairs = (players * (players - 1)) ~/ 2;
   int matches = pairs ~/ 2;
   int matchesPerRound = players ~/ 4;
@@ -40,6 +45,7 @@ void splitPlayers(int players) {
   while(allPlayers.isNotEmpty) {
     if (sortedPlayers.length % playersPerRound == 0) {
       playersInRound = List.generate(playersPerRound, (_) => 0);
+      print('\n\n');
     } 
 
     int player1 = 0;
@@ -55,7 +61,7 @@ void splitPlayers(int players) {
     }
 
     bool pairFound = false;
-    for (int i = shift; i < allPlayers.length; i += 1) {
+    for (int i = 0; i < allPlayers.length; i += 1) {
       player2 = allPlayers[i];
       pair = [player1, player2];
       pair.sort();
@@ -87,6 +93,10 @@ void splitPlayers(int players) {
     allPlayers.remove(player1); 
     allPlayers.remove(player2);
     playersInRound = playersInRound.sublist(2);
+
+    // print(allPlayers);
+    // print(sortedPlayers);
+    // print(playersInRound);
   }
 
   // Split the flat array into multiple arrays of length playersPerRound
@@ -96,10 +106,17 @@ void splitPlayers(int players) {
     splittedPlayers.add(chunk);
   }
 
+  print('\n\n---\n');
+  print(possiblePairs);
+  print(splittedPlayers.length);
   printIndented(splittedPlayers);
+
+
+  return sortedPlayers;
 }
 
 void main() {
-  splitPlayers(4);
-  splitPlayers(5);
+  for (int i = 12; i < 13; i += 1) {
+    splitPlayers(i);
+  }
 }
