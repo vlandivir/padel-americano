@@ -40,11 +40,6 @@ List<List<int>> createMeetingsMatrix(List<List<int>> splitPlayers, int players) 
   return meetingsMatrix;
 }
 
-List<T> shiftLeft<T>(List<T> list, int N) {
-  int n = N % list.length; // Обработка случая, когда N больше длины списка
-  return List<T>.from(list.sublist(n))..addAll(list.sublist(0, n));
-}
-
 void main() {
   int players = 6; // Example number of players
   int pairs = (players * (players - 1)) ~/ 2;
@@ -56,17 +51,6 @@ void main() {
   // Create a flat array to store each player's opponents with (n - 1) elements
   List<int> playersPerMatches = List.generate(players * (players - 1), (index) => (index % players) + 1);
   print(playersPerMatches);
-
-  List<int> sample = [
-    1, 2, 3, 4,
-    5, 6, 1, 3,
-    2, 4, 5, 1,
-    6, 2, 4, 5,
-    3, 6, 2, 5,
-    1, 4, 3, 5,
-    6, 1, 2, 3,
-  ];
-  print(sample);
 
   // Create a list of all possible pairs
   List<List<int>> possiblePairs = [];
