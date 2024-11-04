@@ -8,7 +8,7 @@ void printPairsByRounds(List<List<int>> pairs, int pairsPerRound) {
   }
 }
 
-bool sortPlayers (int players, List<List<int>> possiblePairs) {
+bool sortPlayers (int players, List<List<int>> possiblePairs, {bool printLog = false}) {
   int matchesPerRound = players ~/ 4;
   int pairsPerRound = matchesPerRound * 2; 
 
@@ -17,7 +17,7 @@ bool sortPlayers (int players, List<List<int>> possiblePairs) {
   int escape = 0, pointer = 0;
   List<int> playersInRound = [];
 
-  for (; pointer < possiblePairs.length && escape++ < 10000; /* increment inside the loop */) {
+  for (; pointer < possiblePairs.length && escape++ < possiblePairs.length + 1; /* increment inside the loop */) {
     if (pointer % pairsPerRound == 0) {
       // new round
       playersInRound = [];
@@ -38,16 +38,19 @@ bool sortPlayers (int players, List<List<int>> possiblePairs) {
 
     playersInRound.add(player1);
     playersInRound.add(player2);
+    escape = pointer;
     pointer += 1;
   }
 
-  // print({'escape:', escape, 'pointer:', pointer, '?', pointer == possiblePairs.length});
+  if (printLog) {
+    print({'escape:', escape, 'pointer:', pointer, '?', pointer == possiblePairs.length});
+  }
   return pointer == possiblePairs.length;
 }
 
 void main(List<String> args) {
 
-  for (int players = 4; players < 33; players += 1) {
+  for (int players = 20; players <= 20; players += 1) {
     print('\n\n\n $players players');
     int matchesPerRound = players ~/ 4;
     int pairsPerRound = matchesPerRound * 2;
@@ -60,21 +63,18 @@ void main(List<String> args) {
       }
     }
 
-    //   9999 =  20 minutes
-    //  99999 = 200 minutes
-    // 199999 = 400 minutes (6:40)
     for (int j = 0; j < 199999; j += 1) {
-      var scheduled = sortPlayers(players, possiblePairs);
+      var scheduled = sortPlayers(players, possiblePairs, printLog: j % 1000 == 0);
       // print('players: $players, is scheduled?? $scheduled on step $j');
       // printPairsByRounds(possiblePairs, pairsPerRound);
 
       if (scheduled) {
         print('players: $players, is scheduled?? $scheduled on step $j');
-        // printPairsByRounds(possiblePairs, pairsPerRound);
         break;
       }
       
-      if (players == 12 || players > 16) {
+      if ((players == 12 || players > 16) && j % 1000 == 0) {
+        printPairsByRounds(possiblePairs, pairsPerRound);
         possiblePairs.shuffle();
       } else {
         possiblePairs = possiblePairs.reversed.toList();
@@ -82,6 +82,7 @@ void main(List<String> args) {
 
     }
 
+    print('\n\n\nfinal');
     printPairsByRounds(possiblePairs, pairsPerRound);
   }
 
