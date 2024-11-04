@@ -49,7 +49,7 @@ int sortPlayers (int players, List<List<int>> possiblePairs, {bool printLog = fa
 }
 
 void main(List<String> args) {
-  int justOneSize = 21;
+  int justOneSize = 24;
 
   for (int players = justOneSize; players <= justOneSize; players += 1) {
     print('\n\n\n $players players');
