@@ -1,4 +1,4 @@
-// ignore_for_file: avoid_print
+// ignore_for_file: avoid_print, dead_code
 
 import 'dart:math';
 
@@ -6,6 +6,14 @@ void printPairsByRounds(List<List<int>> pairs, int pairsPerRound) {
   for (int i = 0; i < pairs.length; i += pairsPerRound) {
     print(pairs.sublist(i, min(i + pairsPerRound, pairs.length)));
   }
+}
+
+List<List<List<int>>> splitByRounds(List<List<int>> pairs, int pairsPerRound) {
+  List<List<List<int>>> result = [];
+  for (int i = 0; i < pairs.length; i += pairsPerRound) {
+    result.add(pairs.sublist(i, min(i + pairsPerRound, pairs.length)));
+  }
+  return result;
 }
 
 int sortPlayers (int players, List<List<int>> possiblePairs, {bool printLog = false}) {
@@ -48,59 +56,66 @@ int sortPlayers (int players, List<List<int>> possiblePairs, {bool printLog = fa
   return pointer;
 }
 
-void main(List<String> args) {
-  int justOneSize = 25;
+List<List<List<int>>> generateSchedule(int players) {
+  print('\n\n\n$players players');
+  int matchesPerRound = players ~/ 4;
+  int pairsPerRound = matchesPerRound * 2;
 
-  for (int players = justOneSize; players <= justOneSize; players += 1) {
-    print('\n\n\n $players players');
-    int matchesPerRound = players ~/ 4;
-    int pairsPerRound = matchesPerRound * 2;
-
-    // Create a list of all possible pairs
-    List<List<int>> possiblePairs = [];
-    for (int i = 1; i <= players; i++) {
-      for (int j = i + 1; j <= players; j++) {
-        possiblePairs.add([i, j]);
-      }
+  // Create a list of all possible pairs
+  List<List<int>> possiblePairs = [];
+  for (int i = 1; i <= players; i++) {
+    for (int j = i + 1; j <= players; j++) {
+      possiblePairs.add([i, j]);
     }
-
-    if ((players == 12 || players > 16)) {
-      possiblePairs.shuffle();
-    }
-
-    for (int j = 0; j < 9999999; j += 1) {
-      var shuffleCondition = j % (possiblePairs.length * 2) == 0;
-      var pointer = sortPlayers(players, possiblePairs, printLog: shuffleCondition);
-      var scheduled = pointer == possiblePairs.length;
-      // print('players: $players, is scheduled?? $scheduled on step $j');
-      // printPairsByRounds(possiblePairs, pairsPerRound);
-
-      if (scheduled) {
-        print('\n\n$players players are scheduled on step $j');
-        printPairsByRounds(possiblePairs, pairsPerRound);
-        break;
-      }
-      
-      if ((players == 12 || players > 16)) {
-        if (shuffleCondition) {
-          // printPairsByRounds(possiblePairs, pairsPerRound);
-          possiblePairs.shuffle();
-        } else {
-          var sortedPointer = max(0, min((pointer ~/ pairsPerRound) * pairsPerRound, possiblePairs.length - pairsPerRound * 4));
-          var unsortedPairs = possiblePairs.sublist(sortedPointer);        
-          unsortedPairs.shuffle();
-          var sortedPairs = possiblePairs.sublist(0, sortedPointer);
-
-          possiblePairs = [];
-          possiblePairs.addAll(sortedPairs);
-          possiblePairs.addAll(unsortedPairs);
-        }
-      } else {
-        possiblePairs = possiblePairs.reversed.toList();
-      }
-
-    }    
   }
 
+  // bool playersShuffleRule = players == 12 || players > 16;
+  bool playersShuffleRule = true;
+
+  if (playersShuffleRule) {
+    possiblePairs.shuffle();
+  }
+
+  for (int j = 0; j < 9999999; j += 1) {
+    var shuffleCondition = j % (possiblePairs.length * 2) == 0;
+    var pointer = sortPlayers(players, possiblePairs, printLog: shuffleCondition);
+    var scheduled = pointer == possiblePairs.length;
+
+    if (scheduled) {
+      print('\n$players players are scheduled on step $j');
+      printPairsByRounds(possiblePairs, pairsPerRound);
+      break;
+    }
+    
+    if (playersShuffleRule) {
+      if (shuffleCondition) {
+        possiblePairs.shuffle();
+      } else {
+        var sortedPointer = max(0, min((pointer ~/ pairsPerRound) * pairsPerRound, possiblePairs.length - pairsPerRound * 4));
+        var unsortedPairs = possiblePairs.sublist(sortedPointer);        
+        unsortedPairs.shuffle();
+        var sortedPairs = possiblePairs.sublist(0, sortedPointer);
+
+        possiblePairs = [];
+        possiblePairs.addAll(sortedPairs);
+        possiblePairs.addAll(unsortedPairs);
+      }
+    } else {
+      possiblePairs = possiblePairs.reversed.toList();
+    }
+  }    
+
+  return splitByRounds(possiblePairs, pairsPerRound);
+}
+
+void main(List<String> args) {
+  int left = 4;
+  int right = 20;
+
+  print(args);
+
+  for (int players = left; players <= right; players += 1) {
+    generateSchedule(players);
+  }
 }
 
