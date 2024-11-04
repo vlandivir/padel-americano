@@ -60,7 +60,10 @@ void main(List<String> args) {
       }
     }
 
-    for (int j = 0; j < 9999; j += 1) {
+    //   9999 =  20 minutes
+    //  99999 = 200 minutes
+    // 199999 = 400 minutes (6:40)
+    for (int j = 0; j < 199999; j += 1) {
       var scheduled = sortPlayers(players, possiblePairs);
       // print('players: $players, is scheduled?? $scheduled on step $j');
       // printPairsByRounds(possiblePairs, pairsPerRound);
@@ -71,7 +74,7 @@ void main(List<String> args) {
         break;
       }
       
-      if (players == 12) {
+      if (players == 12 || players > 16) {
         possiblePairs.shuffle();
       } else {
         possiblePairs = possiblePairs.reversed.toList();
