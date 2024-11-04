@@ -49,8 +49,9 @@ int sortPlayers (int players, List<List<int>> possiblePairs, {bool printLog = fa
 }
 
 void main(List<String> args) {
+  int justOneSize = 21;
 
-  for (int players = 20; players <= 20; players += 1) {
+  for (int players = justOneSize; players <= justOneSize; players += 1) {
     print('\n\n\n $players players');
     int matchesPerRound = players ~/ 4;
     int pairsPerRound = matchesPerRound * 2;
@@ -67,35 +68,38 @@ void main(List<String> args) {
       possiblePairs.shuffle();
     }
 
-    for (int j = 0; j < 9999; j += 1) {
-      var pointer = sortPlayers(players, possiblePairs, printLog: j % possiblePairs.length == 0);
+    for (int j = 0; j < 9999999; j += 1) {
+      var shuffleCondition = j % (possiblePairs.length * 2) == 0;
+      var pointer = sortPlayers(players, possiblePairs, printLog: shuffleCondition);
       var scheduled = pointer == possiblePairs.length;
       // print('players: $players, is scheduled?? $scheduled on step $j');
       // printPairsByRounds(possiblePairs, pairsPerRound);
 
       if (scheduled) {
         print('\n\n$players players are scheduled on step $j');
+        printPairsByRounds(possiblePairs, pairsPerRound);
         break;
       }
       
       if ((players == 12 || players > 16)) {
-        if (j % possiblePairs.length == 0) {
-          printPairsByRounds(possiblePairs, pairsPerRound);
+        if (shuffleCondition) {
+          // printPairsByRounds(possiblePairs, pairsPerRound);
           possiblePairs.shuffle();
         } else {
-          var sortedPointer = (pointer ~/ pairsPerRound) * pairsPerRound;
+          var sortedPointer = max(0, min((pointer ~/ pairsPerRound) * pairsPerRound, possiblePairs.length - pairsPerRound * 4));
           var unsortedPairs = possiblePairs.sublist(sortedPointer);        
           unsortedPairs.shuffle();
-          possiblePairs = possiblePairs.sublist(0, sortedPointer);
+          var sortedPairs = possiblePairs.sublist(0, sortedPointer);
+
+          possiblePairs = [];
+          possiblePairs.addAll(sortedPairs);
           possiblePairs.addAll(unsortedPairs);
         }
       } else {
         possiblePairs = possiblePairs.reversed.toList();
       }
 
-    }
-
-    printPairsByRounds(possiblePairs, pairsPerRound);
+    }    
   }
 
 }
