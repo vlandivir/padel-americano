@@ -2,6 +2,57 @@
 
 import 'dart:math';
 
+bool checkTournamentScheduleByChatGPT(List<List<List<int>>> schedule) {
+  // Total number of players
+  int numPlayers = schedule.expand((roundPairs) => roundPairs).expand((pair) => pair).reduce((a, b) => a > b ? a : b);
+
+  // To track the pairs of players
+  Set<String> playedPairs = {};
+  List<int> playerMatchCount = List.filled(numPlayers + 1, 0);
+
+  // Checking each round
+  for (int roundIdx = 0; roundIdx < schedule.length; roundIdx++) {
+    List<List<int>> roundPairs = schedule[roundIdx];
+    Set<int> playersInRound = {};
+    for (List<int> pair in roundPairs) {
+      int player1 = pair[0];
+      int player2 = pair[1];
+
+      // Check if player1 or player2 already played in this round
+      if (playersInRound.contains(player1) || playersInRound.contains(player2)) {
+        print("Player ${playersInRound.contains(player1) ? player1 : player2} plays more than once in round ${roundIdx + 1}");
+        return false;
+      }
+
+      playersInRound.addAll(pair);
+
+      // Check if this pair of players has already played together
+      String sortedPair = '${player1 < player2 ? player1 : player2}-${player1 < player2 ? player2 : player1}';
+      if (playedPairs.contains(sortedPair)) {
+        print("Players $player1 and $player2 play more than once in round ${roundIdx + 1}");
+        return false;
+      }
+      playedPairs.add(sortedPair);
+
+      // Increment match count for both players
+      playerMatchCount[player1]++;
+      playerMatchCount[player2]++;
+    }
+  }
+
+  // Check if all players played the same number of matches
+  int expectedMatchCount = playerMatchCount[1];
+  for (int i = 1; i < playerMatchCount.length; i++) {
+    if (playerMatchCount[i] != expectedMatchCount) {
+      print("Player $i played ${playerMatchCount[i]} matches, while others played $expectedMatchCount");
+      return false;
+    }
+  }
+
+  print("Tournament schedule is valid");
+  return true;
+}
+
 void printPairsByRounds(List<List<int>> pairs, int pairsPerRound) {
   for (int i = 0; i < pairs.length; i += pairsPerRound) {
     print(pairs.sublist(i, min(i + pairsPerRound, pairs.length)));
@@ -111,11 +162,22 @@ List<List<List<int>>> generateSchedule(int players) {
 void main(List<String> args) {
   int left = 4;
   int right = 20;
-
-  print(args);
-
   for (int players = left; players <= right; players += 1) {
-    generateSchedule(players);
+    var schedule = generateSchedule(players);
+    checkTournamentScheduleByChatGPT(schedule);
   }
+
+  // List<List<List<int>>> schedule = [
+  //   [[3, 8], [5, 9], [1, 7], [2, 6]],
+  //   [[4, 7], [6, 8], [3, 9], [1, 5]],
+  //   [[2, 7], [1, 3], [5, 6], [4, 8]],
+  //   [[4, 9], [7, 8], [3, 6], [1, 2]],
+  //   [[5, 7], [1, 4], [2, 3], [6, 9]],
+  //   [[2, 8], [1, 9], [4, 5], [3, 7]],
+  //   [[6, 7], [2, 5], [3, 4], [8, 9]],
+  //   [[1, 8], [4, 6], [2, 9], [3, 5]],
+  //   [[2, 4], [7, 9], [5, 8], [1, 6]],
+  // ];
+  // checkTournamentScheduleByChatGPT(schedule);
 }
 
