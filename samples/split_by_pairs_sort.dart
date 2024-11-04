@@ -8,7 +8,7 @@ void printPairsByRounds(List<List<int>> pairs, int pairsPerRound) {
   }
 }
 
-bool sortPlayers (int players, List<List<int>> possiblePairs, {bool printLog = false}) {
+int sortPlayers (int players, List<List<int>> possiblePairs, {bool printLog = false}) {
   int matchesPerRound = players ~/ 4;
   int pairsPerRound = matchesPerRound * 2; 
 
@@ -45,7 +45,7 @@ bool sortPlayers (int players, List<List<int>> possiblePairs, {bool printLog = f
   if (printLog) {
     print({'escape:', escape, 'pointer:', pointer, '?', pointer == possiblePairs.length});
   }
-  return pointer == possiblePairs.length;
+  return pointer;
 }
 
 void main(List<String> args) {
@@ -63,26 +63,38 @@ void main(List<String> args) {
       }
     }
 
-    for (int j = 0; j < 199999; j += 1) {
-      var scheduled = sortPlayers(players, possiblePairs, printLog: j % 1000 == 0);
+    if ((players == 12 || players > 16)) {
+      possiblePairs.shuffle();
+    }
+
+    for (int j = 0; j < 9999; j += 1) {
+      var pointer = sortPlayers(players, possiblePairs, printLog: j % possiblePairs.length == 0);
+      var scheduled = pointer == possiblePairs.length;
       // print('players: $players, is scheduled?? $scheduled on step $j');
       // printPairsByRounds(possiblePairs, pairsPerRound);
 
       if (scheduled) {
-        print('players: $players, is scheduled?? $scheduled on step $j');
+        print('\n\n$players players are scheduled on step $j');
         break;
       }
       
-      if ((players == 12 || players > 16) && j % 1000 == 0) {
-        printPairsByRounds(possiblePairs, pairsPerRound);
-        possiblePairs.shuffle();
+      if ((players == 12 || players > 16)) {
+        if (j % possiblePairs.length == 0) {
+          printPairsByRounds(possiblePairs, pairsPerRound);
+          possiblePairs.shuffle();
+        } else {
+          var sortedPointer = (pointer ~/ pairsPerRound) * pairsPerRound;
+          var unsortedPairs = possiblePairs.sublist(sortedPointer);        
+          unsortedPairs.shuffle();
+          possiblePairs = possiblePairs.sublist(0, sortedPointer);
+          possiblePairs.addAll(unsortedPairs);
+        }
       } else {
         possiblePairs = possiblePairs.reversed.toList();
       }
 
     }
 
-    print('\n\n\nfinal');
     printPairsByRounds(possiblePairs, pairsPerRound);
   }
 
