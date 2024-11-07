@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_americano/src/users.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 
 import 'tournament.dart';
@@ -39,6 +40,8 @@ class TournamentHomePageState extends State<TournamentHomePage> {
   }
 
   void createTournament() {
+    getUsers();
+
     final numberOfPlayers = int.tryParse(_numberOfPlayersController.text) ?? defaultPlayersNumber;
     final numberOfCourts = int.tryParse(_numberOfCourtsController.text) ?? defaultCourtsNumber;
     final numberOfPoints = int.tryParse(_numberOfPointsController.text) ?? defaultPointsNumber;

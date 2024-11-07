@@ -127,7 +127,7 @@ List<List<List<int>>> generateSchedule(int players) {
     possiblePairs.shuffle();
   }
 
-  for (int j = 0; j < 9999999; j += 1) {
+  for (int j = 0; j < 19999999; j += 1) {
     var shuffleCondition = j % (possiblePairs.length * 2) == 0;
     var pointer = sortPlayers(players, possiblePairs, printLog: shuffleCondition);
     var scheduled = pointer == possiblePairs.length;
@@ -142,7 +142,13 @@ List<List<List<int>>> generateSchedule(int players) {
       if (shuffleCondition) {
         possiblePairs.shuffle();
       } else {
-        var sortedPointer = max(0, min((pointer ~/ pairsPerRound) * pairsPerRound, possiblePairs.length - pairsPerRound * 4));
+        var sortedPointer = max(
+          0, 
+          min(
+            pointer ~/ pairsPerRound * pairsPerRound, 
+            possiblePairs.length - pairsPerRound * pairsPerRound
+          )
+        );
         var unsortedPairs = possiblePairs.sublist(sortedPointer);        
         unsortedPairs.shuffle();
         var sortedPairs = possiblePairs.sublist(0, sortedPointer);
@@ -160,8 +166,9 @@ List<List<List<int>>> generateSchedule(int players) {
 }
 
 void main(List<String> args) {
-  int left = 4;
-  int right = 20;
+  int left = 25;
+  int right = 31;
+  left = right = 25;
   for (int players = left; players <= right; players += 1) {
     var schedule = generateSchedule(players);
     checkTournamentScheduleByChatGPT(schedule);

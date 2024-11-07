@@ -1,4 +1,30 @@
-# padel-americano
+# Padel Americano
+
+## Local setup
+
+```
+brew install firebase-cli
+
+firebase login
+
+firebase init
+    Features
+    * Emulators: Set up local emulators for Firebase products
+    * Firestore: Configure security rules and indexes files for Firestore
+
+    Project Setup – Don't set up a default project
+
+    Emulators Setup
+    * Firestore Emulator
+
+firebase emulators:start
+```
+
+## Local run
+```
+firebase emulators:start
+flutter run -d chrome
+```
 
 A new Flutter project.
 
