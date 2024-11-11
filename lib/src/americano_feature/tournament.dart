@@ -21,10 +21,13 @@ void createSchedule(List<dynamic> players) {
   
   List<dynamic> allMatches = [];
 
+  int roundNum = 0;
+
   for (var round in schedule) {
+    roundNum += 1;
     for (int i = 0; i < round.length - 1; i += 2) {
       allMatches.add({
-        'round': i + 1,
+        'round': roundNum,
         'team1': {
           'player1': players[round[i + 0][0] - 1], 
           'player2': players[round[i + 0][1] - 1], 
