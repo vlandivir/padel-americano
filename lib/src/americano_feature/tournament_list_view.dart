@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'package:flutter/material.dart';
 import 'package:flutter_americano/src/users.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -18,7 +20,6 @@ const defaultCourtsNumber = 2;
 const defaultPointsNumber = 16;
 
 class TournamentHomePageState extends State<TournamentHomePage> {
-  late Box<Tournament> tournamentBox;
   final TextEditingController _numberOfPlayersController = TextEditingController(text: defaultPlayersNumber.toString());
   final TextEditingController _numberOfCourtsController = TextEditingController(text: defaultCourtsNumber.toString());
   final TextEditingController _numberOfPointsController = TextEditingController(text: defaultPointsNumber.toString());
@@ -31,34 +32,17 @@ class TournamentHomePageState extends State<TournamentHomePage> {
   @override
   void initState() {
     super.initState();
-    openBox();
   }
 
-  Future<void> openBox() async {
-    tournamentBox = await Hive.openBox<Tournament>('tournamentBox');
-    setState(() {});
-  }
-
-  void createTournament() {
-    getUsers();
-
+  Future<void> createTournament() async {
     final numberOfPlayers = int.tryParse(_numberOfPlayersController.text) ?? defaultPlayersNumber;
     final numberOfCourts = int.tryParse(_numberOfCourtsController.text) ?? defaultCourtsNumber;
     final numberOfPoints = int.tryParse(_numberOfPointsController.text) ?? defaultPointsNumber;
 
-    final tournament = Tournament(name: 'Americano Padel', numberOfPoints: numberOfPoints, numberOfCourts: numberOfCourts);
+    var users = await getUsers();
+    var players = users.sublist(0, numberOfPlayers);
 
-    List<int> fibonacci = [1, 2];
-    for (int i = 2; i < playerNames.length; i++) {
-      fibonacci.add(fibonacci[i - 1] + fibonacci[i - 2]);
-    }
-
-    for (int i = 0; i < numberOfPlayers && i < playerNames.length; i++) {
-      tournament.addPlayer(playerNames[i], i + 1);
-    }
-    tournament.createSchedule();
-    tournamentBox.add(tournament);
-    setState(() {});
+    createSchedule(players);
   }
 
   @override
@@ -111,35 +95,6 @@ class TournamentHomePageState extends State<TournamentHomePage> {
                     ),
                   ],
                 ),
-              ),
-            ),
-            Expanded(
-              child: ValueListenableBuilder(
-                valueListenable: Hive.box<Tournament>('tournamentBox').listenable(),
-                builder: (context, Box<Tournament> box, _) {
-                  if (box.values.isEmpty) {
-                    return Center(child: Text('No Tournaments Created'));
-                  }
-                  return ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: 600),
-                    child: ListView.builder(
-                      itemCount: box.values.length,
-                      itemBuilder: (context, index) {
-                        final tournament = box.getAt(box.values.length - 1 - index); // sort
-                        if (tournament == null) {
-                          return ListTile(
-                            title: Text('Unnamed Tournament'),
-                            subtitle: Text('No information available'),
-                          );
-                        }
-                        return ListTile(
-                          title: Text(tournament.name),
-                          subtitle: Text(tournament.formatTournamentInfo(tournament)),
-                        );
-                      },
-                    ),
-                  );
-                },
               ),
             ),
           ],

@@ -32,6 +32,29 @@ Future<void> createTestUsers() async {
     userSchema(uuid.v4(), 'Alice Anderson', 'alice.anderson@example.com'),
     userSchema(uuid.v4(), 'Bob Brown', 'bob.brown@example.com'),
     userSchema(uuid.v4(), 'Charlie Clark', 'charlie.clark@example.com'),
+    userSchema(uuid.v4(), 'David Davis', 'david.davis@example.com'),
+    userSchema(uuid.v4(), 'Eve Evans', 'eve.evans@example.com'),
+    userSchema(uuid.v4(), 'Frank Foster', 'frank.foster@example.com'),
+    userSchema(uuid.v4(), 'Grace Green', 'grace.green@example.com'),
+    userSchema(uuid.v4(), 'Hank Harris', 'hank.harris@example.com'),
+    userSchema(uuid.v4(), 'Ivy Irwin', 'ivy.irwin@example.com'),
+    userSchema(uuid.v4(), 'Jack Johnson', 'jack.johnson@example.com'),
+    userSchema(uuid.v4(), 'Karen King', 'karen.king@example.com'),
+    userSchema(uuid.v4(), 'Leo Lewis', 'leo.lewis@example.com'),
+    userSchema(uuid.v4(), 'Mia Mitchell', 'mia.mitchell@example.com'),
+    userSchema(uuid.v4(), 'Nina Norris', 'nina.norris@example.com'),
+    userSchema(uuid.v4(), 'Oscar Owens', 'oscar.owens@example.com'),
+    userSchema(uuid.v4(), 'Paul Parker', 'paul.parker@example.com'),
+    userSchema(uuid.v4(), 'Quincy Quinn', 'quincy.quinn@example.com'),
+    userSchema(uuid.v4(), 'Rachel Reed', 'rachel.reed@example.com'),
+    userSchema(uuid.v4(), 'Sam Smith', 'sam.smith@example.com'),
+    userSchema(uuid.v4(), 'Tina Turner', 'tina.turner@example.com'),
+    userSchema(uuid.v4(), 'Uma Underwood', 'uma.underwood@example.com'),
+    userSchema(uuid.v4(), 'Vince Vaughn', 'vince.vaughn@example.com'),
+    userSchema(uuid.v4(), 'Wendy White', 'wendy.white@example.com'),
+    userSchema(uuid.v4(), 'Xander Xavier', 'xander.xavier@example.com'),
+    userSchema(uuid.v4(), 'Yara Young', 'yara.young@example.com'),
+    userSchema(uuid.v4(), 'Zack Zimmerman', 'zack.zimmerman@example.com'),
   ];
 
   for (Map<String, dynamic> user in testUsers) {
@@ -63,9 +86,9 @@ Future<List<Map<String, dynamic>>> getUsers() async {
     return doc.data() as Map<String, dynamic>;
   }).toList();
 
-  for (var user in users) {
-    prettyPrint(user);
-  }
+  // for (var user in users) {
+  //   prettyPrint(user);
+  // }
   
   return users;
 }

@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 
 import 'package:firebase_core/firebase_core.dart';
 
 import 'src/app.dart';
 import 'src/users.dart'; 
-import 'src/americano_feature/tournament.dart';
 import 'src/settings/settings_controller.dart';
 import 'src/settings/settings_service.dart';
 
@@ -17,16 +15,6 @@ void main() async {
   // Load the user's preferred theme while the splash screen is displayed.
   // This prevents a sudden theme change when the app is first displayed.
   await settingsController.loadSettings();
-
-  await Hive.initFlutter(); // Initialize Hive for Flutter
-
-  Hive.registerAdapter(TournamentAdapter());
-  Hive.registerAdapter(PlayerAdapter());
-  Hive.registerAdapter(TeamAdapter());
-  Hive.registerAdapter(MatchAdapter());
-  Hive.registerAdapter(RoundAdapter());
-
-  await Hive.openBox<Tournament>('tournamentBox'); // Opens the box before running the app
 
   await Firebase.initializeApp(options: FirebaseOptions(
     apiKey: "YOUR_API_KEY",
