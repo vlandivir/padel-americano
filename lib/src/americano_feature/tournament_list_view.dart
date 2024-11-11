@@ -36,8 +36,8 @@ class TournamentHomePageState extends State<TournamentHomePage> {
 
   Future<void> createTournament() async {
     final numberOfPlayers = int.tryParse(_numberOfPlayersController.text) ?? defaultPlayersNumber;
-    final numberOfCourts = int.tryParse(_numberOfCourtsController.text) ?? defaultCourtsNumber;
-    final numberOfPoints = int.tryParse(_numberOfPointsController.text) ?? defaultPointsNumber;
+    // final numberOfCourts = int.tryParse(_numberOfCourtsController.text) ?? defaultCourtsNumber;
+    // final numberOfPoints = int.tryParse(_numberOfPointsController.text) ?? defaultPointsNumber;
 
     var users = await getUsers();
     var players = users.sublist(0, numberOfPlayers);
