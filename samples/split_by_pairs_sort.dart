@@ -120,8 +120,8 @@ List<List<List<int>>> generateSchedule(int players) {
     }
   }
 
-  bool playersShuffleRule = players == 12 || players > 16;
-  // bool playersShuffleRule = true;
+  // bool playersShuffleRule = players == 12 || players > 16;
+  bool playersShuffleRule = true;
 
   if (playersShuffleRule) {
     possiblePairs.shuffle();
@@ -184,8 +184,6 @@ void main(List<String> args) {
       List<List<int>> sortedRound = [];
       
       var round = schedule[r];
-      print (schedule[r]);
-
       while(round.isNotEmpty) {
         if (round.length == 1) {
           sortedRound.add(round[0]);
@@ -235,13 +233,6 @@ void main(List<String> args) {
         matrix[sndTeam[1] - 1][fstTeam[0] - 1] += 1;
         matrix[sndTeam[1] - 1][fstTeam[1] - 1] += 1;
       }
-      print (schedule[r]);
-
-      // Print the matrix
-      for (var row in matrix) {
-        print(row);
-      }      
-      print('\n\n');
     }
 
     // Print the matrix
