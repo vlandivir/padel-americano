@@ -120,8 +120,8 @@ List<List<List<int>>> generateSchedule(int players) {
     }
   }
 
-  // bool playersShuffleRule = players == 12 || players > 16;
-  bool playersShuffleRule = true;
+  bool playersShuffleRule = players == 12 || players > 16;
+  // bool playersShuffleRule = true;
 
   if (playersShuffleRule) {
     possiblePairs.shuffle();
@@ -168,23 +168,92 @@ List<List<List<int>>> generateSchedule(int players) {
 void main(List<String> args) {
   int left = 25;
   int right = 31;
-  left = right = 25;
+
+  left = right = 15;
+  
   for (int players = left; players <= right; players += 1) {
     var schedule = generateSchedule(players);
+    print('\n');
     checkTournamentScheduleByChatGPT(schedule);
-  }
 
-  // List<List<List<int>>> schedule = [
-  //   [[3, 8], [5, 9], [1, 7], [2, 6]],
-  //   [[4, 7], [6, 8], [3, 9], [1, 5]],
-  //   [[2, 7], [1, 3], [5, 6], [4, 8]],
-  //   [[4, 9], [7, 8], [3, 6], [1, 2]],
-  //   [[5, 7], [1, 4], [2, 3], [6, 9]],
-  //   [[2, 8], [1, 9], [4, 5], [3, 7]],
-  //   [[6, 7], [2, 5], [3, 4], [8, 9]],
-  //   [[1, 8], [4, 6], [2, 9], [3, 5]],
-  //   [[2, 4], [7, 9], [5, 8], [1, 6]],
-  // ];
-  // checkTournamentScheduleByChatGPT(schedule);
+    print('\n\n');
+    List<List<int>> matrix = List.generate(players, (_) => List.generate(players, (_) => 0));
+
+
+    for (int r = 0; r < schedule.length; r += 1) {
+      List<List<int>> sortedRound = [];
+      
+      var round = schedule[r];
+      print (schedule[r]);
+      while(round.isNotEmpty) {
+        var pair = round[0];
+        round.removeAt(0);
+
+        if (round.isEmpty) {
+          sortedRound.add(pair);
+          break;
+        }
+
+        int enemyIdx = 0;
+        int enemyMin = players;
+        for (int j = 0; j < round.length; j += 1) {
+          var enemyPair = round[j];
+          int enemyCnt = 0;
+          enemyCnt += matrix[pair[0] - 1][enemyPair[0] - 1] + matrix[pair[0] - 1][enemyPair[1] - 1];
+          enemyCnt += matrix[pair[1] - 1][enemyPair[0] - 1] + matrix[pair[1] - 1][enemyPair[1] - 1];
+          if (enemyCnt < enemyMin) {
+            enemyIdx = j;
+          }
+        }
+        sortedRound.add(pair);
+        sortedRound.add(round[enemyIdx]);
+        round.removeAt(enemyIdx);
+      }
+
+      schedule[r] = sortedRound;
+
+      for (int i = 0; i < sortedRound.length - 1; i += 2) {
+        var fstTeam = sortedRound[i + 0];  
+        var sndTeam = sortedRound[i + 1];
+
+        matrix[fstTeam[0] - 1][sndTeam[0] - 1] += 1;
+        matrix[fstTeam[0] - 1][sndTeam[1] - 1] += 1;
+        matrix[fstTeam[1] - 1][sndTeam[0] - 1] += 1;
+        matrix[fstTeam[1] - 1][sndTeam[1] - 1] += 1;
+
+        matrix[sndTeam[0] - 1][fstTeam[0] - 1] += 1;
+        matrix[sndTeam[0] - 1][fstTeam[1] - 1] += 1;
+        matrix[sndTeam[1] - 1][fstTeam[0] - 1] += 1;
+        matrix[sndTeam[1] - 1][fstTeam[1] - 1] += 1;
+      }
+
+      print (schedule[r]);
+    }
+
+    // Print the matrix
+    for (var row in matrix) {
+      print(row);
+    }      
+    print('\n\n');
+  }  
 }
 
+/*
+[0, 2, 1, 2, 0, 3, 2, 2, 3, 2, 3, 3, 1, 3, 1]
+[2, 0, 2, 1, 0, 1, 4, 3, 6, 1, 2, 2, 1, 2, 1]
+[1, 2, 0, 2, 3, 3, 2, 1, 1, 3, 2, 4, 1, 0, 1]
+[2, 1, 2, 0, 4, 2, 4, 3, 2, 2, 0, 1, 3, 2, 0]
+[0, 0, 3, 4, 0, 1, 2, 1, 3, 3, 2, 2, 1, 2, 4]
+[3, 1, 3, 2, 1, 0, 1, 0, 1, 1, 1, 1, 1, 3, 7]
+[2, 4, 2, 4, 2, 1, 0, 6, 1, 2, 0, 2, 1, 0, 1]
+[2, 3, 1, 3, 1, 0, 6, 0, 0, 1, 1, 3, 3, 3, 1]
+[3, 6, 1, 2, 3, 1, 1, 0, 0, 1, 2, 0, 3, 3, 2]
+[2, 1, 3, 2, 3, 1, 2, 1, 1, 0, 7, 1, 2, 1, 1]
+[3, 2, 2, 0, 2, 1, 0, 1, 2, 7, 0, 3, 2, 1, 2]
+[3, 2, 4, 1, 2, 1, 2, 3, 0, 1, 3, 0, 2, 3, 1]
+[1, 1, 1, 3, 1, 1, 1, 3, 3, 2, 2, 2, 0, 3, 4]
+[3, 2, 0, 2, 2, 3, 0, 3, 3, 1, 1, 3, 3, 0, 2]
+[1, 1, 1, 0, 4, 7, 1, 1, 2, 1, 2, 1, 4, 2, 0]
+
+
+*/
